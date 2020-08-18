@@ -1,5 +1,7 @@
 // @ts-check
 import axios from 'axios';
+import i18next from 'i18next';
+import getTranslation from './getTranslation';
 import parse from './utils';
 
 const container = document.querySelector('.container');
@@ -9,9 +11,11 @@ const domElementInput = container.querySelector('input');
 export default (url) => {
   domElementInput.classList.remove('is-invalid');
 
-  domElementFeedback.textContent = 'Rss has been loaded';
   domElementFeedback.classList.remove('text-danger');
   domElementFeedback.classList.add('text-success');
+  i18next.init(getTranslation).then(() => {
+    domElementFeedback.textContent = i18next.t('responseSuccess');
+  });
 
   axios.get(`https://cors-anywhere.herokuapp.com/${url}`)
     .then(({ data }) => {
