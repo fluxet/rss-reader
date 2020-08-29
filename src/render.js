@@ -7,6 +7,7 @@ import getTranslation from './getTranslation';
 const container = document.querySelector('.container');
 const domElementFeedback = container.querySelector('.feedback');
 const domElementInput = container.querySelector('input');
+const domElementSubmitBtn = container.querySelector('button[type="submit"]');
 
 const state = {
   posts: [],
@@ -14,12 +15,15 @@ const state = {
 
 const renderInvalid = (message) => {
   domElementInput.classList.add('is-invalid');
-  domElementFeedback.textContent = message;
-  domElementFeedback.classList.remove('text-success');
   domElementFeedback.classList.add('text-danger');
+  domElementFeedback.classList.remove('text-success');
+  domElementSubmitBtn.setAttribute('disabled', '');
+  domElementFeedback.textContent = message;
 };
 
 const renderValid = (url) => {
+  domElementInput.value = '';
+
   domElementInput.classList.remove('is-invalid');
   domElementFeedback.classList.remove('text-danger');
   domElementFeedback.classList.add('text-success');
