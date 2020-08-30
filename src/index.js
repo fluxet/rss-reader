@@ -6,11 +6,10 @@ import * as yup from 'yup';
 import onChange from 'on-change';
 import i18next from 'i18next';
 import getTranslation from './getTranslation';
-import render from './render';
+import watch from './watch';
 
 const domElementForm = document.querySelector('.form-inline');
 const domElementInput = domElementForm.querySelector('input');
-const domElementSubmitBtn = domElementForm.querySelector('button[type="submit"]');
 
 const state = {
   value: '',
@@ -20,17 +19,7 @@ const state = {
   btnDisableChanger: 0,
 };
 
-const watched = onChange(state, (path) => {
-  if (path === 'btnDisableChanger') {
-    domElementSubmitBtn.removeAttribute('disabled');
-    return;
-  }
-  if ((path !== 'urls') && (path !== 'error')) {
-    return;
-  }
-  render(state);
-});
-
+const watched = onChange(state, (path) => watch(state, path));
 const schema = yup.string().url().required();
 
 domElementForm.addEventListener('submit', (evt) => {
