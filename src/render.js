@@ -8,10 +8,7 @@ const container = document.querySelector('.container');
 const domElementFeedback = container.querySelector('.feedback');
 const domElementInput = container.querySelector('input');
 const domElementSubmitBtn = container.querySelector('button[type="submit"]');
-
-const state = {
-  posts: [],
-};
+const requestDelay = 5000;
 
 const renderInvalid = (message) => {
   domElementInput.classList.add('is-invalid');
@@ -22,6 +19,10 @@ const renderInvalid = (message) => {
 };
 
 const renderValid = (url) => {
+  const state = {
+    posts: [],
+  };
+
   domElementInput.value = '';
 
   domElementInput.classList.remove('is-invalid');
@@ -31,14 +32,11 @@ const renderValid = (url) => {
     domElementFeedback.textContent = i18next.t('responseSuccess');
   });
 
-  const renderLoop = (isFirstIteration) => {
+  const renderLoop = (isFirstIteration = true) => {
     axios.get(`https://cors-anywhere.herokuapp.com/${url}`)
       .then(({ data }) => {
         const rssContent = parse(data);
         const { headerContent, posts } = rssContent;
-
-        const newPosts = getNewPosts(state.posts, posts);
-        state.posts.push(...newPosts);
 
         if (isFirstIteration) {
           const header = document.createElement('h2');
@@ -46,21 +44,24 @@ const renderValid = (url) => {
           container.append(header);
         }
 
-        newPosts.forEach(({ text, link }) => {
+        const newPosts = getNewPosts(state.posts, posts);
+        state.posts.push(...newPosts);
+
+        newPosts.forEach(({ title, link }) => {
           const domItem = document.createElement('div');
           const domLink = document.createElement('a');
-          domLink.textContent = text;
+          domLink.textContent = title;
           domLink.href = link;
           domItem.append(domLink);
           container.append(domItem);
         });
-
-        setTimeout(() => {
-          renderLoop(false);
-        }, 5000);
-      });
+      })
+      .catch((err) => {
+        console.log('connection error: ', err);
+      })
+      .then(() => setTimeout(() => renderLoop(false), requestDelay));
   };
-  renderLoop(true);
+  renderLoop();
 };
 
 export default (mainState) => {

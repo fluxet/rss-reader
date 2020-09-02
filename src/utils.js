@@ -7,9 +7,11 @@ export const parse = (data) => {
 
   const headerContent = dataDom.querySelector('channel > title').textContent;
 
-  const titles = [...dataDom.querySelectorAll('item title')].map((el) => el.textContent);
-  const links = [...dataDom.querySelectorAll('item link')].map((el) => el.textContent);
-  const posts = titles.map((el, i) => ({ text: el, link: links[i] }));
+  const posts = [...dataDom.querySelectorAll('item')].map((item) => {
+    const link = item.querySelector('link').textContent;
+    const title = item.querySelector('title').textContent;
+    return ({ title, link });
+  });
 
   return { posts, headerContent };
 };
