@@ -77,7 +77,7 @@ export default () => {
       });
   });
 
-  domElementInput.addEventListener('change', () => {
+  domElementInput.addEventListener('input', () => {
     watched.btnDisableChanger += 1;
   });
 };
