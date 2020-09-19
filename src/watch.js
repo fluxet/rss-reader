@@ -1,9 +1,9 @@
 // @ts-check
 import { renderHeader, renderValidation, renderPosts } from './render';
 
-const domElementSubmitBtn = document.querySelector('button[type="submit"]');
-
 export default (state, path) => {
+  const domElementSubmitBtn = document.querySelector('button[type="submit"]');
+
   switch (path) {
     case 'btnDisableChanger': return domElementSubmitBtn.removeAttribute('disabled');
     case 'error': return renderValidation(state.error);

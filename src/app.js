@@ -6,10 +6,12 @@ import getTranslation from './getTranslation';
 import watch from './watch';
 import getData from './getData';
 
-const domElementForm = document.querySelector('.form-inline');
-const domElementInput = domElementForm.querySelector('input');
-
 export default () => {
+  const domElementForm = document.querySelector('.form-inline');
+  const domElementInput = domElementForm.querySelector('input');
+
+  getTranslation();
+
   const state = {
     value: '',
     isUrlValid: false,
@@ -29,9 +31,7 @@ export default () => {
       .then(() => {
         if (state.urls.includes(state.value)) {
           watched.isUrlValid = false;
-          i18next.init(getTranslation).then(() => {
-            watched.error = i18next.t('errExistUrl');
-          });
+          watched.error = i18next.t('errExistUrl');
         } else {
           watched.error = '';
           watched.isUrlValid = true;
