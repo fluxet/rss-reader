@@ -1,10 +1,10 @@
 // @ts-check
 import * as yup from 'yup';
 import onChange from 'on-change';
-import axios from 'axios';
 import i18next from 'i18next';
 import getTranslation from './getTranslation';
 import watch from './watch';
+import getData from './getData';
 import { parse, getNewPosts } from './utils';
 
 const requestDelay = 5000;
@@ -30,8 +30,8 @@ export default () => {
   const watched = onChange(state, (path) => watch(state, path));
   const schema = yup.string().url().required();
 
-  const getData = (url) => {
-    axios.get(`https://cors-anywhere.herokuapp.com/${url}`)
+  const processRequest = (url) => {
+    getData(url)
       .then(({ data }) => {
         watched.error = '';
 
@@ -50,7 +50,7 @@ export default () => {
       .catch((err) => {
         watched.error = err;
       })
-      .finally(setTimeout.bind(null, getData.bind(null, url), requestDelay));
+      .finally(setTimeout.bind(null, processRequest.bind(null, url), requestDelay));
   };
 
   domElementForm.addEventListener('submit', (evt) => {
@@ -68,7 +68,7 @@ export default () => {
           watched.urls.push(state.value);
 
           const currentUrl = state.urls[state.urls.length - 1];
-          getData(currentUrl);
+          processRequest(currentUrl);
         }
       })
       .catch(({ errors: [err] }) => {
