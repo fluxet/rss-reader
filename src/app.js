@@ -50,7 +50,9 @@ export default () => {
       .catch((err) => {
         watched.error = err;
       })
-      .finally(setTimeout.bind(null, getData.bind(null, url), requestDelay));
+      .finally(() => {
+        setTimeout(() => getData(url), requestDelay);
+      });
   };
 
   domElementForm.addEventListener('submit', (evt) => {
