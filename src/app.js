@@ -4,7 +4,7 @@ import onChange from 'on-change';
 import axios from 'axios';
 import i18next from 'i18next';
 import getTranslation from './getTranslation';
-import watch from './watch';
+import render from './render';
 import { parse, getNewPosts } from './utils';
 
 const requestDelay = 5000;
@@ -16,7 +16,6 @@ export default () => {
   getTranslation();
 
   const state = {
-    value: '',
     isUrlValid: false,
     urls: [],
     error: 'startValue',
@@ -27,7 +26,7 @@ export default () => {
     btnDisableChanger: 0,
   };
 
-  const watched = onChange(state, (path) => watch(state, path));
+  const watched = onChange(state, (path) => render(state, path));
   const schema = yup.string().url().required();
 
   const getData = (url) => {
@@ -57,17 +56,17 @@ export default () => {
 
   domElementForm.addEventListener('submit', (evt) => {
     evt.preventDefault();
-    state.value = domElementInput.value;
+    const inputValue = domElementInput.value;
 
-    schema.validate(state.value)
+    schema.validate(inputValue)
       .then(() => {
-        if (state.urls.includes(state.value)) {
+        if (state.urls.includes(inputValue)) {
           watched.isUrlValid = false;
           watched.error = i18next.t('errExistUrl');
         } else {
           watched.error = '';
           watched.isUrlValid = true;
-          watched.urls.push(state.value);
+          watched.urls.push(inputValue);
 
           const currentUrl = state.urls[state.urls.length - 1];
           getData(currentUrl);
