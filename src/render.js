@@ -23,25 +23,25 @@ const renderValidation = (message) => {
   domElementFeedback.textContent = message;
 };
 
-const renderPosts = (newPosts) => {
-  const container = document.querySelector('.container');
+const renderChannels = (channels) => {
+  const container = document.querySelector('.rss-container');
+  container.textContent = '';
 
-  newPosts.forEach(({ title, link }) => {
-    const domItem = document.createElement('div');
-    const domLink = document.createElement('a');
-    domLink.textContent = title;
-    domLink.href = link;
-    domItem.append(domLink);
-    container.append(domItem);
+  const channelContents = Object.values(channels);
+  channelContents.forEach(({ headerContent, posts }) => {
+    const header = document.createElement('h2');
+    header.textContent = headerContent;
+    container.append(header);
+
+    posts.forEach(({ title, link }) => {
+      const domItem = document.createElement('div');
+      const domLink = document.createElement('a');
+      domLink.textContent = title;
+      domLink.href = link;
+      domItem.append(domLink);
+      container.append(domItem);
+    });
   });
-};
-
-const renderHeader = (headerContent) => {
-  const container = document.querySelector('.container');
-
-  const header = document.createElement('h2');
-  header.textContent = headerContent;
-  container.append(header);
 };
 
 const renderInputEnabling = () => {
@@ -50,11 +50,11 @@ const renderInputEnabling = () => {
 };
 
 export default (state, path) => {
-  switch (path) {
+  const stateKey = path.split('.')[0];
+  switch (stateKey) {
     case 'btnDisableChanger': return renderInputEnabling();
     case 'error': return renderValidation(state.error);
-    case 'newHeaderContent': return renderHeader(state.newHeaderContent);
-    case 'newPosts': return renderPosts(state.newPosts);
+    case 'channels': return renderChannels(state.channels);
     default: return null;
   }
 };

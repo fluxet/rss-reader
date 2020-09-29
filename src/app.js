@@ -5,7 +5,7 @@ import axios from 'axios';
 import i18next from 'i18next';
 import getTranslation from './getTranslation';
 import render from './render';
-import { parse, getNewPosts } from './utils';
+import parse from './utils';
 
 const requestDelay = 5000;
 
@@ -19,10 +19,7 @@ export default () => {
     isUrlValid: false,
     urls: [],
     error: 'startValue',
-    posts: [],
-    newPosts: [],
-    headerContents: [],
-    newHeaderContent: '',
+    channels: {},
     btnDisableChanger: 0,
   };
 
@@ -33,18 +30,7 @@ export default () => {
     axios.get(`https://cors-anywhere.herokuapp.com/${url}`)
       .then(({ data }) => {
         watched.error = '';
-
-        const rssContent = parse(data);
-        const { headerContent, posts } = rssContent;
-
-        if (!state.headerContents.includes(headerContent)) {
-          watched.newHeaderContent = headerContent;
-          watched.headerContents.push(headerContent);
-        }
-
-        const newPosts = getNewPosts(state.posts, posts);
-        watched.posts.push(...newPosts);
-        watched.newPosts = newPosts;
+        watched.channels[url] = parse(data);
       })
       .catch((err) => {
         watched.error = err;

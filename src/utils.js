@@ -1,7 +1,5 @@
 // @ts-check
-import _ from 'lodash';
-
-export const parse = (data) => {
+export default (data) => {
   const parser = new DOMParser();
   const dataDom = parser.parseFromString(data, 'application/xml');
 
@@ -15,7 +13,3 @@ export const parse = (data) => {
 
   return { posts, headerContent };
 };
-
-export const getNewPosts = (oldPosts, currentPosts) => currentPosts
-  .filter((currentPost) => oldPosts
-    .filter((oldPost) => _.isEqual(currentPost, oldPost)).length === 0);
