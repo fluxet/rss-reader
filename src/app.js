@@ -1,5 +1,5 @@
-// @ts-check
 import * as yup from 'yup';
+import _ from 'lodash';
 import onChange from 'on-change';
 import axios from 'axios';
 import i18next from 'i18next';
@@ -30,7 +30,12 @@ export default () => {
     axios.get(`https://cors-anywhere.herokuapp.com/${url}`)
       .then(({ data }) => {
         watched.error = '';
-        watched.channels[url] = parse(data);
+
+        const { headerContent, posts } = parse(data);
+        const oldPosts = state.channels[url]?.posts;
+        const newPosts = _.unionWith(posts, oldPosts, _.isEqual);
+
+        watched.channels[url] = { headerContent, posts: newPosts };
       })
       .catch((err) => {
         watched.error = err;
