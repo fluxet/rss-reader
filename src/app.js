@@ -20,7 +20,7 @@ export default () => {
     urls: [],
     error: 'startValue',
     channels: {},
-    btnDisableChanger: 0,
+    isFormDisabled: false,
   };
 
   const watched = onChange(state, (path) => render(state, path));
@@ -39,6 +39,7 @@ export default () => {
       })
       .catch((err) => {
         watched.error = err;
+        watched.isFormDisabled = true;
       })
       .finally(() => {
         setTimeout(() => getData(url), requestDelay);
@@ -54,8 +55,10 @@ export default () => {
         if (state.urls.includes(inputValue)) {
           watched.isUrlValid = false;
           watched.error = i18next.t('errExistUrl');
+          watched.isFormDisabled = true;
         } else {
           watched.error = '';
+          watched.isFormDisabled = false;
           watched.isUrlValid = true;
           watched.urls.push(inputValue);
 
@@ -66,10 +69,11 @@ export default () => {
       .catch(({ errors: [err] }) => {
         watched.isUrlValid = false;
         watched.error = err;
+        watched.isFormDisabled = true;
       });
   });
 
   domElementInput.addEventListener('input', () => {
-    watched.btnDisableChanger += 1;
+    watched.isFormDisabled = false;
   });
 };

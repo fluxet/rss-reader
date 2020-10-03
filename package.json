@@ -17,6 +17,7 @@
   "homepage": "https://github.com/fluxet/frontend-project-lvl3#readme",
   "devDependencies": {
     "@babel/core": "^7.10.3",
+    "@babel/plugin-proposal-optional-chaining": "^7.11.0",
     "@babel/preset-env": "^7.10.3",
     "autoprefixer": "^9.8.3",
     "babel-eslint": "^10.1.0",

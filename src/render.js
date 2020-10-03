@@ -5,7 +5,6 @@ const renderValidation = (message) => {
   const container = document.querySelector('.container');
   const domElementFeedback = container.querySelector('.feedback');
   const domElementInput = container.querySelector('input');
-  const domElementSubmitBtn = container.querySelector('button[type="submit"]');
 
   if (message === '') {
     domElementInput.value = '';
@@ -19,7 +18,6 @@ const renderValidation = (message) => {
   domElementInput.classList.add('is-invalid');
   domElementFeedback.classList.add('text-danger');
   domElementFeedback.classList.remove('text-success');
-  domElementSubmitBtn.setAttribute('disabled', '');
   domElementFeedback.textContent = message;
 };
 
@@ -44,15 +42,20 @@ const renderChannels = (channels) => {
   });
 };
 
-const renderInputEnabling = () => {
+const renderInputEnabling = (isFormDisabled) => {
   const domElementSubmitBtn = document.querySelector('button[type="submit"]');
+
+  if (isFormDisabled) {
+    domElementSubmitBtn.setAttribute('disabled', '');
+    return;
+  }
   domElementSubmitBtn.removeAttribute('disabled');
 };
 
 export default (state, path) => {
   const stateKey = path.split('.')[0];
   switch (stateKey) {
-    case 'btnDisableChanger': return renderInputEnabling();
+    case 'isFormDisabled': return renderInputEnabling(state.isFormDisabled);
     case 'error': return renderValidation(state.error);
     case 'channels': return renderChannels(state.channels);
     default: return null;
