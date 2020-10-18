@@ -3,7 +3,6 @@ import _ from 'lodash';
 import onChange from 'on-change';
 import axios from 'axios';
 import i18next from 'i18next';
-import getTranslation from './getTranslation';
 import render from './render';
 import parse from './utils';
 
@@ -13,14 +12,11 @@ export default () => {
   const domElementForm = document.querySelector('.form-inline');
   const domElementInput = domElementForm.querySelector('input');
 
-  getTranslation();
-
   const state = {
-    isUrlValid: false,
+    mode: 'waiting', // [waiting, blocked, valid, invalid]
     urls: [],
     error: 'startValue',
     channels: {},
-    isFormDisabled: false,
   };
 
   const watched = onChange(state, (path) => render(state, path));
@@ -30,7 +26,6 @@ export default () => {
     axios.get(`https://cors-anywhere.herokuapp.com/${url}`)
       .then(({ data }) => {
         watched.error = '';
-
         const { headerContent, posts } = parse(data);
         const oldPosts = state.channels[url]?.posts;
         const newPosts = _.unionWith(posts, oldPosts, _.isEqual);
@@ -39,7 +34,7 @@ export default () => {
       })
       .catch((err) => {
         watched.error = err;
-        watched.isFormDisabled = true;
+        watched.mode = 'invalid';
       })
       .finally(() => {
         setTimeout(() => getData(url), requestDelay);
@@ -48,6 +43,7 @@ export default () => {
 
   domElementForm.addEventListener('submit', (evt) => {
     evt.preventDefault();
+    watched.mode = 'blocked';
     const inputValue = domElementInput.value;
 
     schema.validate(inputValue)
@@ -55,25 +51,26 @@ export default () => {
         if (state.urls.includes(inputValue)) {
           watched.isUrlValid = false;
           watched.error = i18next.t('errExistUrl');
-          watched.isFormDisabled = true;
+
+          watched.mode = 'invalid';
         } else {
           watched.error = '';
-          watched.isFormDisabled = false;
           watched.isUrlValid = true;
           watched.urls.push(inputValue);
 
           const currentUrl = state.urls[state.urls.length - 1];
           getData(currentUrl);
+
+          watched.mode = 'valid';
         }
       })
       .catch(({ errors: [err] }) => {
-        watched.isUrlValid = false;
         watched.error = err;
-        watched.isFormDisabled = true;
+        watched.mode = 'invalid';
       });
   });
 
   domElementInput.addEventListener('input', () => {
-    watched.isFormDisabled = false;
+    watched.mode = 'waiting';
   });
 };
