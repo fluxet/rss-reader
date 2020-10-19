@@ -59,7 +59,7 @@ export default (state, path) => {
 
   const renderValidation = () => {
     if (!renderingByMode[state.mode]) {
-      throw new Error(`Unknown state mode: ${state.mode}`)
+      throw new Error(`Unknown state mode: ${state.mode}`);
     }
 
     renderingByMode[state.mode](state.error);
