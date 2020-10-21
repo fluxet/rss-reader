@@ -44,7 +44,7 @@ export default () => {
   form.addEventListener('submit', (evt) => {
     evt.preventDefault();
     watched.mode = 'blocked';
-    const urlValue = state.urlValue;
+    const { urlValue } = state;
 
     schema.validate(urlValue)
       .then(() => {
