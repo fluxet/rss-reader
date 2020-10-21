@@ -3,12 +3,15 @@ import _ from 'lodash';
 import onChange from 'on-change';
 import axios from 'axios';
 import i18next from 'i18next';
+import initTranslation from './initTranslation';
 import render from './render';
 import parse from './utils';
 
 const requestDelay = 5000;
 
 export default () => {
+  initTranslation();
+
   const form = document.querySelector('.form-inline');
 
   const state = {
@@ -27,7 +30,7 @@ export default () => {
       .then(({ data }) => {
         watched.error = '';
         const { headerContent, posts } = parse(data);
-        const oldPosts = state.channels[url]?.posts;
+        const oldPosts = watched.channels[url]?.posts;
         const newPosts = _.unionWith(posts, oldPosts, _.isEqual);
 
         watched.channels[url] = { headerContent, posts: newPosts };
@@ -44,11 +47,11 @@ export default () => {
   form.addEventListener('submit', (evt) => {
     evt.preventDefault();
     watched.mode = 'blocked';
-    const { urlValue } = state;
+    const { urlValue } = watched;
 
     schema.validate(urlValue)
       .then(() => {
-        if (state.urls.includes(urlValue)) {
+        if (watched.urls.includes(urlValue)) {
           watched.isUrlValid = false;
           watched.error = i18next.t('errExistUrl');
 
@@ -58,7 +61,7 @@ export default () => {
           watched.isUrlValid = true;
           watched.urls.push(urlValue);
 
-          const currentUrl = state.urls[state.urls.length - 1];
+          const currentUrl = watched.urls[watched.urls.length - 1];
           getData(currentUrl);
 
           watched.mode = 'valid';
