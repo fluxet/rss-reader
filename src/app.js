@@ -9,14 +9,14 @@ import parse from './utils';
 const requestDelay = 5000;
 
 export default () => {
-  const domElementForm = document.querySelector('.form-inline');
-  const domElementInput = domElementForm.querySelector('input');
+  const form = document.querySelector('.form-inline');
 
   const state = {
-    mode: 'waiting', // [waiting, blocked, valid, invalid]
+    mode: 'waiting',
     urls: [],
     error: 'startValue',
     channels: {},
+    urlValue: '',
   };
 
   const watched = onChange(state, (path) => render(state, path));
@@ -41,14 +41,14 @@ export default () => {
       });
   };
 
-  domElementForm.addEventListener('submit', (evt) => {
+  form.addEventListener('submit', (evt) => {
     evt.preventDefault();
     watched.mode = 'blocked';
-    const inputValue = domElementInput.value;
+    const urlValue = state.urlValue;
 
-    schema.validate(inputValue)
+    schema.validate(urlValue)
       .then(() => {
-        if (state.urls.includes(inputValue)) {
+        if (state.urls.includes(urlValue)) {
           watched.isUrlValid = false;
           watched.error = i18next.t('errExistUrl');
 
@@ -56,7 +56,7 @@ export default () => {
         } else {
           watched.error = '';
           watched.isUrlValid = true;
-          watched.urls.push(inputValue);
+          watched.urls.push(urlValue);
 
           const currentUrl = state.urls[state.urls.length - 1];
           getData(currentUrl);
@@ -70,7 +70,8 @@ export default () => {
       });
   });
 
-  domElementInput.addEventListener('input', () => {
+  form.url.addEventListener('input', () => {
+    watched.urlValue = form.url.value;
     watched.mode = 'waiting';
   });
 };
