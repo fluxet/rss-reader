@@ -2,7 +2,6 @@ import * as yup from 'yup';
 import _ from 'lodash';
 import onChange from 'on-change';
 import axios from 'axios';
-import i18next from 'i18next';
 import initTranslation from './initTranslation';
 import render from './render';
 import parse from './utils';
@@ -15,29 +14,32 @@ export default () => {
   const form = document.querySelector('.form-inline');
 
   const state = {
-    mode: 'waiting',
+    modeInput: 'filling',
+    modeValidation: '',
     urls: [],
     error: 'startValue',
-    channels: {},
+    channels: [],
     urlValue: '',
   };
 
   const watched = onChange(state, (path) => render(state, path));
-  const schema = yup.string().url().required();
 
   const getData = (url) => {
     axios.get(`https://cors-anywhere.herokuapp.com/${url}`)
       .then(({ data }) => {
-        watched.error = '';
+        const channelIndex = watched.channels.findIndex((channel) => channel.url === url);
+        const currentIndex = (channelIndex >= 0) ? channelIndex : watched.channels.length;
+
         const { headerContent, posts } = parse(data);
-        const oldPosts = watched.channels[url]?.posts;
+        const oldPosts = watched.channels[currentIndex]?.posts;
         const newPosts = _.unionWith(posts, oldPosts, _.isEqual);
 
-        watched.channels[url] = { headerContent, posts: newPosts };
+        const updatedChannel = { url, headerContent, posts: newPosts };
+        watched.channels[currentIndex] = updatedChannel;
       })
       .catch((err) => {
         watched.error = err;
-        watched.mode = 'invalid';
+        watched.modeValidation = 'invalid';
       })
       .finally(() => {
         setTimeout(() => getData(url), requestDelay);
@@ -46,35 +48,26 @@ export default () => {
 
   form.addEventListener('submit', (evt) => {
     evt.preventDefault();
-    watched.mode = 'blocked';
+    watched.modeInput = 'blocked';
+    watched.modeValidation = 'valid';
     const { urlValue } = watched;
 
+    const schema = yup.string().url().required().notOneOf(watched.urls);
     schema.validate(urlValue)
       .then(() => {
-        if (watched.urls.includes(urlValue)) {
-          watched.isUrlValid = false;
-          watched.error = i18next.t('errExistUrl');
-
-          watched.mode = 'invalid';
-        } else {
-          watched.error = '';
-          watched.isUrlValid = true;
-          watched.urls.push(urlValue);
-
-          const currentUrl = watched.urls[watched.urls.length - 1];
-          getData(currentUrl);
-
-          watched.mode = 'valid';
-        }
+        watched.error = '';
+        watched.urls.push(urlValue);
+        getData(urlValue);
+        watched.modeValidation = 'valid';
       })
       .catch(({ errors: [err] }) => {
         watched.error = err;
-        watched.mode = 'invalid';
+        watched.modeValidation = 'invalid';
       });
   });
 
   form.url.addEventListener('input', () => {
     watched.urlValue = form.url.value;
-    watched.mode = 'waiting';
+    watched.modeInput = 'filling';
   });
 };

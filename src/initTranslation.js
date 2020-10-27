@@ -9,7 +9,6 @@ export default () => {
       en: {
         translation: {
           responseSuccess: 'Rss has been loaded',
-          errExistUrl: 'Rss already exists',
         },
       },
     },

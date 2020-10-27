@@ -33,8 +33,7 @@ export default (state, path) => {
   const renderChannels = () => {
     elements.containerRss.textContent = '';
 
-    const channelContents = Object.values(state.channels);
-    channelContents.forEach(({ headerContent, posts }) => {
+    state.channels.forEach(({ headerContent, posts }) => {
       const header = document.createElement('h2');
       header.textContent = headerContent;
       elements.containerRss.append(header);
@@ -50,28 +49,42 @@ export default (state, path) => {
     });
   };
 
-  const renderingByMode = {
-    waiting: renderInputEnabling,
-    blocked: renderBlocked,
+  const renderingByValidation = {
     invalid: renderInvalid,
     valid: renderValid,
   };
 
-  const renderValidation = () => {
-    if (!renderingByMode[state.mode]) {
-      throw new Error(`Unknown state mode: ${state.mode}`);
-    }
-
-    renderingByMode[state.mode](state.error);
+  const renderingByModeInput = {
+    filling: renderInputEnabling,
+    blocked: renderBlocked,
   };
 
-  const renderingByStatekey = {
-    mode: renderValidation,
+  const renderValidation = () => {
+    if (!renderingByValidation[state.modeValidation]) {
+      throw new Error(`Unknown validation mode: ${state.modeValidation}`);
+    }
+
+    renderingByValidation[state.modeValidation](state.error);
+  };
+
+  const rendermodeInput = () => {
+    if (!renderingByModeInput[state.modeInput]) {
+      throw new Error(`Unknown loading mode: ${state.modeInput}`);
+    }
+
+    renderingByModeInput[state.modeInput]();
+  };
+
+  const renderingByPath = {
+    modeValidation: renderValidation,
+    modeInput: rendermodeInput,
     channels: renderChannels,
   };
 
   const stateKey = path.split('.')[0];
-  if (!renderingByStatekey[stateKey]) { return; }
+  if (!renderingByPath[stateKey]) { return; }
 
-  renderingByStatekey[stateKey](elements, state);
+  renderingByPath[stateKey](elements, state);
+  console.log('path: ', path);
+  console.log('state: ', state);
 };
