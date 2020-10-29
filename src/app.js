@@ -14,17 +14,25 @@ export default () => {
   const form = document.querySelector('.form-inline');
 
   const state = {
-    modeInput: 'filling',
-    modeValidation: '',
-    urls: [],
-    error: 'startValue',
+    form: {
+      status: 'filling', // ['filling, 'valid', 'invalid', 'blocked']
+      error: null,
+      urlValue: '',
+    },
+    loading: {
+      status: 'loading', // ['loading', 'success', 'fail']
+      error: null,
+    },
     channels: [],
-    urlValue: '',
+    urls: [],
   };
 
   const watched = onChange(state, (path) => render(state, path));
 
   const getData = (url) => {
+    watched.loading.error = '';
+    watched.loading.status = 'loading';
+
     axios.get(`https://cors-anywhere.herokuapp.com/${url}`)
       .then(({ data }) => {
         const channelIndex = watched.channels.findIndex((channel) => channel.url === url);
@@ -35,11 +43,12 @@ export default () => {
         const newPosts = _.unionWith(posts, oldPosts, _.isEqual);
 
         const updatedChannel = { url, headerContent, posts: newPosts };
+        watched.loading.status = 'success';
         watched.channels[currentIndex] = updatedChannel;
       })
       .catch((err) => {
-        watched.error = err;
-        watched.modeValidation = 'invalid';
+        watched.loading.error = err;
+        watched.loading.status = 'fail';
       })
       .finally(() => {
         setTimeout(() => getData(url), requestDelay);
@@ -48,26 +57,25 @@ export default () => {
 
   form.addEventListener('submit', (evt) => {
     evt.preventDefault();
-    watched.modeInput = 'blocked';
-    watched.modeValidation = 'valid';
-    const { urlValue } = watched;
+    const { urlValue } = watched.form;
 
     const schema = yup.string().url().required().notOneOf(watched.urls);
     schema.validate(urlValue)
       .then(() => {
-        watched.error = '';
+        watched.form.error = '';
+        watched.form.status = 'valid';
         watched.urls.push(urlValue);
         getData(urlValue);
-        watched.modeValidation = 'valid';
+        watched.form.status = 'blocked';
       })
       .catch(({ errors: [err] }) => {
-        watched.error = err;
-        watched.modeValidation = 'invalid';
+        watched.form.error = err;
+        watched.form.status = 'invalid';
       });
   });
 
   form.url.addEventListener('input', () => {
-    watched.urlValue = form.url.value;
-    watched.modeInput = 'filling';
+    watched.form.urlValue = form.url.value;
+    watched.form.status = 'filling';
   });
 };

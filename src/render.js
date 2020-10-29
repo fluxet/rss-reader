@@ -49,42 +49,46 @@ export default (state, path) => {
     });
   };
 
-  const renderingByValidation = {
+  const renderDataLoadingStatus = () => null;
+
+  const renderingByFormStatus = {
+    filling: renderInputEnabling,
     invalid: renderInvalid,
     valid: renderValid,
-  };
-
-  const renderingByModeInput = {
-    filling: renderInputEnabling,
     blocked: renderBlocked,
   };
 
-  const renderValidation = () => {
-    if (!renderingByValidation[state.modeValidation]) {
-      throw new Error(`Unknown validation mode: ${state.modeValidation}`);
-    }
-
-    renderingByValidation[state.modeValidation](state.error);
+  const renderingByLoadingStatus = {
+    loading: renderDataLoadingStatus,
+    success: renderChannels,
+    fail: renderInvalid,
   };
 
-  const rendermodeInput = () => {
-    if (!renderingByModeInput[state.modeInput]) {
-      throw new Error(`Unknown loading mode: ${state.modeInput}`);
+  const renderForm = () => {
+    if (!renderingByFormStatus[state.form.status]) {
+      throw new Error(`Unknown form status: ${state.form.status}`);
     }
 
-    renderingByModeInput[state.modeInput]();
+    renderingByFormStatus[state.form.status](state.form.error);
+  };
+
+  const renderLoading = () => {
+    if (!renderingByLoadingStatus[state.loading.status]) {
+      throw new Error(`Unknown loading status: ${state.loading.status}`);
+    }
+
+    renderingByLoadingStatus[state.loading.status](state.loading.error);
   };
 
   const renderingByPath = {
-    modeValidation: renderValidation,
-    modeInput: rendermodeInput,
-    channels: renderChannels,
+    'form.status': renderForm,
+    'loading.status': renderLoading,
   };
 
-  const stateKey = path.split('.')[0];
-  if (!renderingByPath[stateKey]) { return; }
-
-  renderingByPath[stateKey](elements, state);
   console.log('path: ', path);
   console.log('state: ', state);
+
+  if (!renderingByPath[path]) { return; }
+
+  renderingByPath[path](elements, state);
 };
