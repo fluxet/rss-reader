@@ -2,7 +2,6 @@ import * as yup from 'yup';
 import _ from 'lodash';
 import onChange from 'on-change';
 import axios from 'axios';
-import i18next from 'i18next';
 import initTranslation from './initTranslation';
 import render from './render';
 import parse from './utils';
@@ -48,12 +47,11 @@ export default () => {
 
           watched.loading.status = 'success';
           watched.channels[currentIndex] = updatedChannel;
-        }
-        catch(err) {
+        } catch (err) {
           watched.loading.error = err;
           watched.loading.status = 'fail';
           watched.urls = watched.urls.filter((itemUrl) => itemUrl !== url);
-        } 
+        }
       })
       .catch((err) => {
         watched.loading.error = err;

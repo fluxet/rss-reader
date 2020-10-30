@@ -85,9 +85,6 @@ export default (state, path) => {
     'loading.status': renderLoading,
   };
 
-  console.log('path: ', path);
-  console.log('state: ', state);
-
   if (!renderingByPath[path]) { return; }
 
   renderingByPath[path](elements, state);
