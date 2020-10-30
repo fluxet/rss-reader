@@ -10,7 +10,7 @@ export default () => {
         translation: {
           responseSuccess: 'Rss has been loaded',
           errExistUrl: 'Rss already exists',
-          errInvalidUrl: 'This must be a valid url',
+          errInvalidRss: 'This source doesn\'t contain valid rss',
         },
       },
     },

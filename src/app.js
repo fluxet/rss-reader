@@ -39,19 +39,21 @@ export default () => {
         const channelIndex = watched.channels.findIndex((channel) => channel.url === url);
         const currentIndex = (channelIndex >= 0) ? channelIndex : watched.channels.length;
 
-        const { headerContent, posts } = parse(data);
-        const oldPosts = watched.channels[currentIndex]?.posts;
-        const newPosts = _.unionWith(posts, oldPosts, _.isEqual);
-        const updatedChannel = { url, headerContent, posts: newPosts };
+        try {
+          const { headerContent, posts } = parse(data);
 
-        if (headerContent) {
+          const oldPosts = watched.channels[currentIndex]?.posts;
+          const newPosts = _.unionWith(posts, oldPosts, _.isEqual);
+          const updatedChannel = { url, headerContent, posts: newPosts };
+
           watched.loading.status = 'success';
           watched.channels[currentIndex] = updatedChannel;
-        } else {
-          watched.loading.error = i18next.t('errInvalidUrl');
+        }
+        catch(err) {
+          watched.loading.error = err;
           watched.loading.status = 'fail';
           watched.urls = watched.urls.filter((itemUrl) => itemUrl !== url);
-        }
+        } 
       })
       .catch((err) => {
         watched.loading.error = err;
