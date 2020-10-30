@@ -33,8 +33,7 @@ export default (state, path) => {
   const renderChannels = () => {
     elements.containerRss.textContent = '';
 
-    const channelContents = Object.values(state.channels);
-    channelContents.forEach(({ headerContent, posts }) => {
+    state.channels.forEach(({ headerContent, posts }) => {
       const header = document.createElement('h2');
       header.textContent = headerContent;
       elements.containerRss.append(header);
@@ -50,28 +49,46 @@ export default (state, path) => {
     });
   };
 
-  const renderingByMode = {
-    waiting: renderInputEnabling,
-    blocked: renderBlocked,
+  const renderDataLoadingStatus = () => null;
+
+  const renderingByFormStatus = {
+    filling: renderInputEnabling,
     invalid: renderInvalid,
     valid: renderValid,
+    blocked: renderBlocked,
   };
 
-  const renderValidation = () => {
-    if (!renderingByMode[state.mode]) {
-      throw new Error(`Unknown state mode: ${state.mode}`);
+  const renderingByLoadingStatus = {
+    loading: renderDataLoadingStatus,
+    success: renderChannels,
+    fail: renderInvalid,
+  };
+
+  const renderForm = () => {
+    if (!renderingByFormStatus[state.form.status]) {
+      throw new Error(`Unknown form status: ${state.form.status}`);
     }
 
-    renderingByMode[state.mode](state.error);
+    renderingByFormStatus[state.form.status](state.form.error);
   };
 
-  const renderingByStatekey = {
-    mode: renderValidation,
-    channels: renderChannels,
+  const renderLoading = () => {
+    if (!renderingByLoadingStatus[state.loading.status]) {
+      throw new Error(`Unknown loading status: ${state.loading.status}`);
+    }
+
+    renderingByLoadingStatus[state.loading.status](state.loading.error);
   };
 
-  const stateKey = path.split('.')[0];
-  if (!renderingByStatekey[stateKey]) { return; }
+  const renderingByPath = {
+    'form.status': renderForm,
+    'loading.status': renderLoading,
+  };
 
-  renderingByStatekey[stateKey](elements, state);
+  console.log('path: ', path);
+  console.log('state: ', state);
+
+  if (!renderingByPath[path]) { return; }
+
+  renderingByPath[path](elements, state);
 };

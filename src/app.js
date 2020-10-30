@@ -15,66 +15,76 @@ export default () => {
   const form = document.querySelector('.form-inline');
 
   const state = {
-    mode: 'waiting',
+    form: {
+      status: 'filling', // ['filling, 'valid', 'invalid', 'blocked']
+      error: null,
+      urlValue: '',
+    },
+    loading: {
+      status: 'loading', // ['loading', 'success', 'fail']
+      error: null,
+    },
+    channels: [],
     urls: [],
-    error: 'startValue',
-    channels: {},
-    urlValue: '',
   };
 
   const watched = onChange(state, (path) => render(state, path));
-  const schema = yup.string().url().required();
 
   const getData = (url) => {
+    watched.loading.error = '';
+    watched.loading.status = 'loading';
+
     axios.get(`https://cors-anywhere.herokuapp.com/${url}`)
       .then(({ data }) => {
-        watched.error = '';
-        const { headerContent, posts } = parse(data);
-        const oldPosts = watched.channels[url]?.posts;
-        const newPosts = _.unionWith(posts, oldPosts, _.isEqual);
+        const channelIndex = watched.channels.findIndex((channel) => channel.url === url);
+        const currentIndex = (channelIndex >= 0) ? channelIndex : watched.channels.length;
 
-        watched.channels[url] = { headerContent, posts: newPosts };
+        const { headerContent, posts } = parse(data);
+        const oldPosts = watched.channels[currentIndex]?.posts;
+        const newPosts = _.unionWith(posts, oldPosts, _.isEqual);
+        const updatedChannel = { url, headerContent, posts: newPosts };
+
+        if (headerContent) {
+          watched.loading.status = 'success';
+          watched.channels[currentIndex] = updatedChannel;
+        } else {
+          watched.loading.error = i18next.t('errInvalidUrl');
+          watched.loading.status = 'fail';
+          watched.urls = watched.urls.filter((itemUrl) => itemUrl !== url);
+        }
       })
       .catch((err) => {
-        watched.error = err;
-        watched.mode = 'invalid';
+        watched.loading.error = err;
+        watched.loading.status = 'fail';
       })
       .finally(() => {
-        setTimeout(() => getData(url), requestDelay);
+        if (watched.urls.includes(url)) {
+          setTimeout(() => getData(url), requestDelay);
+        }
       });
   };
 
   form.addEventListener('submit', (evt) => {
     evt.preventDefault();
-    watched.mode = 'blocked';
-    const { urlValue } = watched;
+    const { urlValue } = watched.form;
 
+    const schema = yup.string().url().required().notOneOf(watched.urls);
     schema.validate(urlValue)
       .then(() => {
-        if (watched.urls.includes(urlValue)) {
-          watched.isUrlValid = false;
-          watched.error = i18next.t('errExistUrl');
-
-          watched.mode = 'invalid';
-        } else {
-          watched.error = '';
-          watched.isUrlValid = true;
-          watched.urls.push(urlValue);
-
-          const currentUrl = watched.urls[watched.urls.length - 1];
-          getData(currentUrl);
-
-          watched.mode = 'valid';
-        }
+        watched.form.error = '';
+        watched.form.status = 'valid';
+        watched.urls.push(urlValue);
+        getData(urlValue);
+        watched.form.status = 'blocked';
       })
       .catch(({ errors: [err] }) => {
-        watched.error = err;
-        watched.mode = 'invalid';
+        watched.form.error = err;
+        watched.form.status = 'invalid';
       });
   });
 
   form.url.addEventListener('input', () => {
-    watched.urlValue = form.url.value;
-    watched.mode = 'waiting';
+    watched.form.urlValue = form.url.value;
+    watched.form.status = 'filling';
   });
 };
