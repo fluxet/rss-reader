@@ -14,7 +14,7 @@ export default (state, path) => {
   const renderBlocked = () => {
     elements.submitBtn.setAttribute('disabled', '');
     elements.input.setAttribute('readonly', '');
-  }
+  };
 
   const renderValid = () => {
     elements.input.value = '';
