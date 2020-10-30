@@ -11,7 +11,10 @@ export default (state, path) => {
   };
 
   const renderInputEnabling = () => elements.submitBtn.removeAttribute('disabled');
-  const renderBlocked = () => elements.submitBtn.setAttribute('disabled', '');
+  const renderBlocked = () => {
+    elements.submitBtn.setAttribute('disabled', '');
+    elements.input.setAttribute('readonly', '');
+  }
 
   const renderValid = () => {
     elements.input.value = '';
@@ -27,11 +30,14 @@ export default (state, path) => {
     elements.feedback.classList.add('text-danger');
     elements.feedback.classList.remove('text-success');
     elements.submitBtn.setAttribute('disabled', '');
+    elements.input.removeAttribute('readonly');
     elements.feedback.textContent = errorMessage;
   };
 
   const renderChannels = () => {
     elements.containerRss.textContent = '';
+    elements.submitBtn.removeAttribute('disabled');
+    elements.input.removeAttribute('readonly');
 
     state.channels.forEach(({ headerContent, posts }) => {
       const header = document.createElement('h2');
