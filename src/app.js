@@ -20,7 +20,7 @@ export default () => {
       urlValue: '',
     },
     loading: {
-      status: 'loading', // ['loading', 'success', 'fail']
+      status: 'iddle', // ['iddle, loading', 'success', 'fail']
       error: null,
     },
     channels: [],
@@ -47,6 +47,7 @@ export default () => {
 
           watched.loading.status = 'success';
           watched.channels[currentIndex] = updatedChannel;
+          watched.loading.status = 'iddle';
         } catch (err) {
           watched.loading.error = err;
           watched.loading.status = 'fail';

@@ -49,6 +49,7 @@ export default (state, path) => {
     });
   };
 
+  const renderIddleStatus = () => null;
   const renderDataLoadingStatus = () => null;
 
   const renderingByFormStatus = {
@@ -59,6 +60,7 @@ export default (state, path) => {
   };
 
   const renderingByLoadingStatus = {
+    iddle: renderIddleStatus,
     loading: renderDataLoadingStatus,
     success: renderChannels,
     fail: renderInvalid,
