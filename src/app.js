@@ -20,7 +20,7 @@ export default () => {
       urlValue: '',
     },
     loading: {
-      status: 'iddle', // ['iddle, loading', 'success', 'fail']
+      status: 'idle', // ['idle, loading', 'success', 'fail']
       error: null,
     },
     channels: [],
@@ -45,9 +45,9 @@ export default () => {
           const newPosts = _.unionWith(posts, oldPosts, _.isEqual);
           const updatedChannel = { url, headerContent, posts: newPosts };
 
-          watched.loading.status = 'success';
           watched.channels[currentIndex] = updatedChannel;
-          watched.loading.status = 'iddle';
+          watched.loading.status = 'success';
+          watched.loading.status = 'idle';
         } catch (err) {
           watched.loading.error = err;
           watched.loading.status = 'fail';
