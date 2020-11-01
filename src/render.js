@@ -68,7 +68,6 @@ export default (state, path) => {
   const renderingByLoadingStatus = {
     idle: renderIdleStatus,
     loading: renderDataLoadingStatus,
-    success: renderChannels,
     fail: renderInvalid,
   };
 
@@ -88,12 +87,15 @@ export default (state, path) => {
     renderingByLoadingStatus[state.loading.status](state.loading.error);
   };
 
+  const channelPath = (path.includes('channels')) ? path : null;
+
   const renderingByPath = {
     'form.status': renderForm,
     'loading.status': renderLoading,
+    [channelPath]: renderChannels,
   };
 
   if (!renderingByPath[path]) { return; }
 
-  renderingByPath[path](elements, state);
+  renderingByPath[path]();
 };
