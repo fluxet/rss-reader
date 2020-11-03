@@ -39,18 +39,22 @@ export default () => {
         const currentIndex = (channelIndex >= 0) ? channelIndex : watched.channels.length;
 
         try {
-          const { headerContent, posts } = parse(data);
+          const { feeds, posts } = parse(data);
 
           const oldPosts = watched.channels[currentIndex]?.posts;
           const newPosts = _.unionWith(posts, oldPosts, _.isEqual);
-          const updatedChannel = { url, headerContent, posts: newPosts };
+          const updatedChannel = {
+            url,
+            feeds,
+            posts: newPosts,
+          };
 
           watched.channels[currentIndex] = updatedChannel;
           watched.loading.status = 'idle';
         } catch (err) {
           watched.loading.error = err;
           watched.loading.status = 'fail';
-          watched.urls = watched.urls.filter((itemUrl) => itemUrl !== url);
+          watched.channels = watched.channels.filter((channel) => channel.url !== url);
         }
       })
       .catch((err) => {
@@ -58,7 +62,9 @@ export default () => {
         watched.loading.status = 'fail';
       })
       .finally(() => {
-        if (watched.urls.includes(url)) {
+        const wasParsingSuccessful = !!_.find(watched.channels, { url });
+
+        if (wasParsingSuccessful) {
           setTimeout(() => getData(url), requestDelay);
         }
       });
@@ -66,14 +72,16 @@ export default () => {
 
   form.addEventListener('submit', (evt) => {
     evt.preventDefault();
-    const { urlValue } = watched.form;
 
-    const schema = yup.string().url().required().notOneOf(watched.urls);
+    const { urlValue } = watched.form;
+    const urls = watched.channels.map(({ url }) => url);
+
+    const schema = yup.string().url().required().notOneOf(urls);
     schema.validate(urlValue)
       .then(() => {
         watched.form.error = '';
         watched.form.status = 'valid';
-        watched.urls.push(urlValue);
+
         getData(urlValue);
         watched.form.status = 'blocked';
       })

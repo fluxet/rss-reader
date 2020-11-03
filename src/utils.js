@@ -11,11 +11,14 @@ export default (data) => {
     throw new Error(i18next.t('errInvalidRss'));
   }
 
+  const descriptionContent = dataDom.querySelector('channel > description').textContent;
+  const feeds = { headerContent, descriptionContent };
+
   const posts = [...dataDom.querySelectorAll('item')].map((item) => {
     const link = item.querySelector('link').textContent;
     const title = item.querySelector('title').textContent;
     return ({ title, link });
   });
 
-  return { posts, headerContent };
+  return { feeds, posts };
 };

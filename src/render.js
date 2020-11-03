@@ -3,8 +3,8 @@ import i18next from 'i18next';
 
 export default (state, path) => {
   const elements = {
-    container: document.querySelector('.container'),
-    containerRss: document.querySelector('.rss-container'),
+    containerFeeds: document.querySelector('.feeds'),
+    containerPosts: document.querySelector('.posts'),
     feedback: document.querySelector('.feedback'),
     input: document.querySelector('input'),
     submitBtn: document.querySelector('button[type="submit"]'),
@@ -34,23 +34,48 @@ export default (state, path) => {
     elements.feedback.textContent = errorMessage;
   };
 
+  const renderContainer = (containerDom, containerName, listClasses) => {
+    const feedsHeader = document.createElement('h2');
+    const feedsList = document.createElement('ul');
+    feedsHeader.textContent = containerName;
+    feedsList.classList.add(...listClasses);
+    containerDom.append(feedsHeader);
+    containerDom.append(feedsList);
+  };
+
   const renderChannels = () => {
-    elements.containerRss.textContent = '';
     elements.submitBtn.removeAttribute('disabled');
     elements.input.removeAttribute('readonly');
 
-    state.channels.forEach(({ headerContent, posts }) => {
-      const header = document.createElement('h2');
-      header.textContent = headerContent;
-      elements.containerRss.append(header);
+    elements.containerFeeds.textContent = '';
+    elements.containerPosts.textContent = '';
+    renderContainer(elements.containerFeeds, 'Feeds', ['list-group', 'mb-5']);
+    renderContainer(elements.containerPosts, 'Posts', ['list-group']);
+
+    const feedsList = elements.containerFeeds.querySelector('ul');
+    const postsList = elements.containerPosts.querySelector('ul');
+
+    state.channels.forEach(({ feeds: { headerContent, descriptionContent }, posts }) => {
+      const feedsItem = document.createElement('li');
+      feedsItem.classList.add('list-group-item');
+
+      const channelHeader = document.createElement('h3');
+      const channelDescription = document.createElement('p');
+      channelHeader.textContent = headerContent;
+      channelDescription.textContent = descriptionContent;
+      feedsItem.append(channelHeader);
+      feedsItem.append(channelDescription);
+      feedsList.append(feedsItem);
 
       posts.forEach(({ title, link }) => {
-        const domItem = document.createElement('div');
+        const postsItem = document.createElement('li');
+        postsItem.classList.add('list-group-item');
+
         const domLink = document.createElement('a');
         domLink.textContent = title;
         domLink.href = link;
-        domItem.append(domLink);
-        elements.containerRss.append(domItem);
+        postsItem.append(domLink);
+        postsList.append(postsItem);
       });
     });
   };
