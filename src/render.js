@@ -44,43 +44,48 @@ export default (state, path) => {
   };
 
   const renderChannels = () => {
-    elements.submitBtn.removeAttribute('disabled');
-    elements.input.removeAttribute('readonly');
-
     elements.containerFeeds.textContent = '';
-    elements.containerPosts.textContent = '';
     renderContainer(elements.containerFeeds, 'Feeds', ['list-group', 'mb-5']);
-    renderContainer(elements.containerPosts, 'Posts', ['list-group']);
 
     const feedsList = elements.containerFeeds.querySelector('ul');
-    const postsList = elements.containerPosts.querySelector('ul');
 
-    state.channels.forEach(({ feeds: { headerContent, descriptionContent }, posts }) => {
+    state.channels.forEach(({ title, description }) => {
       const feedsItem = document.createElement('li');
       feedsItem.classList.add('list-group-item');
 
       const channelHeader = document.createElement('h3');
       const channelDescription = document.createElement('p');
-      channelHeader.textContent = headerContent;
-      channelDescription.textContent = descriptionContent;
+      channelHeader.textContent = title;
+      channelDescription.textContent = description;
       feedsItem.append(channelHeader);
       feedsItem.append(channelDescription);
       feedsList.append(feedsItem);
-
-      posts.forEach(({ title, link }) => {
-        const postsItem = document.createElement('li');
-        postsItem.classList.add('list-group-item');
-
-        const domLink = document.createElement('a');
-        domLink.textContent = title;
-        domLink.href = link;
-        postsItem.append(domLink);
-        postsList.append(postsItem);
-      });
     });
   };
 
-  const renderIdleStatus = () => null;
+  const renderPosts = () => {
+    elements.containerPosts.textContent = '';
+    renderContainer(elements.containerPosts, 'Posts', ['list-group']);
+
+    const postsList = elements.containerPosts.querySelector('ul');
+
+    state.posts.forEach(({ title, link }) => {
+      const postsItem = document.createElement('li');
+      postsItem.classList.add('list-group-item');
+
+      const domLink = document.createElement('a');
+      domLink.textContent = title;
+      domLink.href = link;
+      postsItem.append(domLink);
+      postsList.append(postsItem);
+    });
+  };
+
+  const renderIdleStatus = () => {
+    elements.submitBtn.removeAttribute('disabled');
+    elements.input.removeAttribute('readonly');
+  };
+
   const renderDataLoadingStatus = () => null;
 
   const renderingByFormStatus = {
@@ -112,12 +117,11 @@ export default (state, path) => {
     renderingByLoadingStatus[state.loading.status](state.loading.error);
   };
 
-  const channelPath = (path.includes('channels')) ? path : null;
-
   const renderingByPath = {
     'form.status': renderForm,
     'loading.status': renderLoading,
-    [channelPath]: renderChannels,
+    channels: renderChannels,
+    posts: renderPosts,
   };
 
   if (!renderingByPath[path]) { return; }

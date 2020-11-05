@@ -24,7 +24,7 @@ export default () => {
       error: null,
     },
     channels: [],
-    urls: [],
+    posts: [],
   };
 
   const watched = onChange(state, (path) => render(state, path));
@@ -35,21 +35,26 @@ export default () => {
 
     axios.get(`https://cors-anywhere.herokuapp.com/${url}`)
       .then(({ data }) => {
-        const channelIndex = watched.channels.findIndex((channel) => channel.url === url);
-        const currentIndex = (channelIndex >= 0) ? channelIndex : watched.channels.length;
+        const currentChannel = watched.channels.find((channel) => channel.url === url);
 
         try {
           const { feeds, posts } = parse(data);
 
-          const oldPosts = watched.channels[currentIndex]?.posts;
-          const newPosts = _.unionWith(posts, oldPosts, _.isEqual);
           const updatedChannel = {
             url,
-            feeds,
-            posts: newPosts,
+            id: (currentChannel) ? currentChannel.id : watched.channels.length,
+            title: feeds.headerContent,
+            description: feeds.descriptionContent,
           };
+          const currentPosts = posts.map((post) => ({
+            channelId: updatedChannel.id,
+            title: post.title,
+            link: post.link,
+          }));
 
-          watched.channels[currentIndex] = updatedChannel;
+          watched.posts = _.unionWith(watched.posts, currentPosts, _.isEqual);
+          watched.channels = _.unionWith(watched.channels, [updatedChannel], _.isEqual);
+
           watched.loading.status = 'idle';
         } catch (err) {
           watched.loading.error = err;
